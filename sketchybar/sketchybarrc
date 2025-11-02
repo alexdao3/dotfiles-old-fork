@@ -37,15 +37,15 @@ sketchybar --default "${default[@]}"
 ##### Adding AeroSpace Workspaces #####
 sketchybar --add event aerospace_workspace_change
 
-# Create simple workspace indicators (single icon per space)
-# Only create items for workspaces we actually use
-WORKSPACES="1 2 3 A C D E"
+# Create workspace indicators for ALL possible workspaces
+# The script will hide empty ones dynamically
+WORKSPACES="1 2 3 4 5 6 7 8 9 A B C D E F G H I J K L M N O P Q R S T U V W X Y Z"
 
 for sid in $WORKSPACES; do
   sketchybar --add item space.$sid left \
     --subscribe space.$sid aerospace_workspace_change \
     --set space.$sid \
-    icon.font="JetBrainsMono Nerd Font:Bold:16.0" \
+    icon.font="sketchybar-app-font:Regular:16.0" \
     label.font="SF Pro:Bold:13.0" \
     icon.padding_left=8 \
     icon.padding_right=2 \
@@ -111,12 +111,44 @@ sketchybar --add item media center \
   --subscribe media media_change
 
 ##### Right Items #####
+# Each item gets its own pill background with padding between them
 sketchybar --add item clock right \
   --set clock \
   update_freq=10 \
   script="$PLUGIN_DIR/clock.sh" \
+  icon="󰥔" \
   icon.color=$BLUE \
-  label.color=$TEXT
+  label.color=$TEXT \
+  background.color=$SURFACE0 \
+  background.corner_radius=6 \
+  background.padding_left=8 \
+  background.padding_right=8 \
+  padding_left=8
+
+sketchybar --add item battery right \
+  --set battery \
+  update_freq=120 \
+  script="$PLUGIN_DIR/battery.sh" \
+  icon.color=$GREEN \
+  label.color=$TEXT \
+  background.color=$SURFACE0 \
+  background.corner_radius=6 \
+  background.padding_left=8 \
+  background.padding_right=8 \
+  padding_left=8 \
+  --subscribe battery system_woke power_source_change
+
+sketchybar --add item volume right \
+  --set volume \
+  script="$PLUGIN_DIR/volume.sh" \
+  icon.color=$SAPPHIRE \
+  label.color=$TEXT \
+  background.color=$SURFACE0 \
+  background.corner_radius=6 \
+  background.padding_left=8 \
+  background.padding_right=8 \
+  padding_left=8 \
+  --subscribe volume volume_change
 
 sketchybar --add item system_monitor right \
   --set system_monitor \
@@ -126,34 +158,17 @@ sketchybar --add item system_monitor right \
   icon.color=$GREEN \
   label.font="SF Pro:Semibold:12.0" \
   label.color=$TEXT \
+  background.color=$SURFACE0 \
+  background.corner_radius=6 \
+  background.padding_left=8 \
+  background.padding_right=8 \
+  padding_left=8 \
   click_script="open -a 'Activity Monitor'"
-
-sketchybar --add item volume right \
-  --set volume \
-  script="$PLUGIN_DIR/volume.sh" \
-  icon.color=$SAPPHIRE \
-  label.color=$TEXT \
-  --subscribe volume volume_change
-
-sketchybar --add item battery right \
-  --set battery \
-  update_freq=120 \
-  script="$PLUGIN_DIR/battery.sh" \
-  icon.color=$GREEN \
-  label.color=$TEXT \
-  --subscribe battery system_woke power_source_change
 
 ##### Grouping (optional rounded backgrounds) #####
 sketchybar --add bracket workspaces '/space\..*/' \
   --set workspaces \
   background.drawing=off
-
-sketchybar --add bracket right_items clock system_monitor volume battery \
-  --set right_items \
-  background.color=$SURFACE0 \
-  background.corner_radius=8 \
-  background.padding_left=8 \
-  background.padding_right=8
 
 ##### Force all scripts to run #####
 sketchybar --update

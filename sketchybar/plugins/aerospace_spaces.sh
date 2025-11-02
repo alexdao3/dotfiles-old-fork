@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Simplified aerospace workspace indicator
-# Shows single icon per workspace based on state
+# Aerospace workspace indicator with app icons
+# Shows icon based on the app running in the workspace
 
 source "$CONFIG_DIR/colors-catppuccin.sh"
 
@@ -11,17 +11,23 @@ SID=$1
 # Check if this is the focused workspace
 FOCUSED=$(aerospace list-workspaces --focused)
 
-# Check if workspace has windows
+# Get the first app name in this workspace
+FIRST_APP=$(aerospace list-windows --workspace "$SID" --format "%{app-name}" 2>/dev/null | head -1)
 WINDOW_COUNT=$(aerospace list-windows --workspace "$SID" --format "%{app-name}" 2>/dev/null | wc -l | tr -d ' ')
-
-# Use consistent coffee cup icon like the reference implementation
-ICON="󰃃"
 
 # If workspace is empty, hide it
 if [ "$WINDOW_COUNT" -eq 0 ]; then
     sketchybar --set "$NAME" drawing=off
     exit 0
 fi
+
+# Use SketchyBar's built-in icon mapping (SF Symbols)
+# Source the icon map function from the old config
+source "$CONFIG_DIR/plugins/icon_map_fn.sh"
+
+# Get the icon for the app
+icon_map "$FIRST_APP"
+ICON="$icon_result"
 
 # Determine colors based on state
 if [ "$SID" = "$FOCUSED" ]; then
