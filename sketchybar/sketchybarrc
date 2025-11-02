@@ -1,0 +1,159 @@
+#!/bin/bash
+
+# Catppuccin Macchiato themed SketchyBar config for AeroSpace
+PLUGIN_DIR="$CONFIG_DIR/plugins"
+source "$CONFIG_DIR/colors-catppuccin.sh"
+
+##### Bar Appearance #####
+sketchybar --bar \
+  position=top \
+  height=32 \
+  color=$TRANSPARENT \
+  shadow=off \
+  sticky=on \
+  padding_left=23 \
+  padding_right=23 \
+  notch_width=188
+
+##### Changing Defaults #####
+default=(
+  padding_left=5
+  padding_right=5
+  icon.font="JetBrainsMono Nerd Font:Medium:15.0"
+  label.font="JetBrainsMono Nerd Font:Medium:12.0"
+  icon.color=$TEXT
+  label.color=$TEXT
+  icon.padding_left=7
+  icon.padding_right=7
+  label.padding_left=7
+  label.padding_right=7
+  updates=on
+  background.color=$SURFACE1
+  background.corner_radius=5
+  background.height=26
+)
+sketchybar --default "${default[@]}"
+
+##### Adding AeroSpace Workspaces #####
+sketchybar --add event aerospace_workspace_change
+
+# Create simple workspace indicators (single icon per space)
+# Only create items for workspaces we actually use
+WORKSPACES="1 2 3 A C D E"
+
+for sid in $WORKSPACES; do
+  sketchybar --add item space.$sid left \
+    --subscribe space.$sid aerospace_workspace_change \
+    --set space.$sid \
+    icon.font="JetBrainsMono Nerd Font:Bold:16.0" \
+    label.font="SF Pro:Bold:13.0" \
+    icon.padding_left=8 \
+    icon.padding_right=2 \
+    label.padding_right=8 \
+    padding_left=0 \
+    padding_right=0 \
+    background.drawing=on \
+    background.corner_radius=6 \
+    background.height=24 \
+    background.border_width=2 \
+    background.border_color=$TRANSPARENT \
+    drawing=off \
+    click_script="aerospace workspace $sid" \
+    script="$PLUGIN_DIR/aerospace_spaces.sh $sid"
+done
+
+##### Left Items #####
+# Weather + City
+sketchybar --add item weather left \
+  --set weather \
+  update_freq=1800 \
+  script="$PLUGIN_DIR/weather.sh" \
+  icon.font="JetBrainsMono Nerd Font:Bold:16.0" \
+  icon.color=$YELLOW \
+  label.font="JetBrainsMono Nerd Font:Medium:13.0" \
+  label.color=$TEXT \
+  background.color=$SURFACE0 \
+  background.corner_radius=6 \
+  background.padding_left=8 \
+  background.padding_right=8 \
+  padding_left=15
+
+# Front app
+sketchybar --add item front_app left \
+  --set front_app \
+  icon.drawing=off \
+  label.font="SF Pro:Semibold:14.0" \
+  label.color=$TEXT \
+  padding_left=10 \
+  background.color=$SURFACE0 \
+  background.corner_radius=6 \
+  background.padding_left=8 \
+  background.padding_right=8 \
+  script="$PLUGIN_DIR/front_app.sh" \
+  --subscribe front_app front_app_switched
+
+##### Center Items (Notch-aware) #####
+# Media player (Apple Music/Spotify)
+sketchybar --add item media center \
+  --set media \
+  update_freq=2 \
+  script="$PLUGIN_DIR/media.sh" \
+  icon.font="JetBrainsMono Nerd Font:Bold:16.0" \
+  icon.color=$PINK \
+  label.font="JetBrainsMono Nerd Font:Medium:13.0" \
+  label.color=$TEXT \
+  label.max_chars=45 \
+  scroll_texts=on \
+  background.color=$SURFACE0 \
+  background.corner_radius=6 \
+  background.padding_left=8 \
+  background.padding_right=8 \
+  --subscribe media media_change
+
+##### Right Items #####
+sketchybar --add item clock right \
+  --set clock \
+  update_freq=10 \
+  script="$PLUGIN_DIR/clock.sh" \
+  icon.color=$BLUE \
+  label.color=$TEXT
+
+sketchybar --add item system_monitor right \
+  --set system_monitor \
+  update_freq=5 \
+  script="$PLUGIN_DIR/system_monitor_simple.sh" \
+  icon="" \
+  icon.color=$GREEN \
+  label.font="SF Pro:Semibold:12.0" \
+  label.color=$TEXT \
+  click_script="open -a 'Activity Monitor'"
+
+sketchybar --add item volume right \
+  --set volume \
+  script="$PLUGIN_DIR/volume.sh" \
+  icon.color=$SAPPHIRE \
+  label.color=$TEXT \
+  --subscribe volume volume_change
+
+sketchybar --add item battery right \
+  --set battery \
+  update_freq=120 \
+  script="$PLUGIN_DIR/battery.sh" \
+  icon.color=$GREEN \
+  label.color=$TEXT \
+  --subscribe battery system_woke power_source_change
+
+##### Grouping (optional rounded backgrounds) #####
+sketchybar --add bracket workspaces '/space\..*/' \
+  --set workspaces \
+  background.drawing=off
+
+sketchybar --add bracket right_items clock system_monitor volume battery \
+  --set right_items \
+  background.color=$SURFACE0 \
+  background.corner_radius=8 \
+  background.padding_left=8 \
+  background.padding_right=8
+
+##### Force all scripts to run #####
+sketchybar --update
