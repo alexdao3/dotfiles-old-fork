@@ -1,0 +1,54 @@
+shell-integration = zsh
+font-family = MesloLGS Nerd Font Mono
+font-size = 16
+background-opacity = 0.85
+theme = Afterglow
+macos-option-as-alt = true
+mouse-hide-while-typing = true
+scrollback-limit = 1000000
+
+keybind = shift+enter=text:\x1b\r
+
+# wipe defaults, add paste back
+keybind=clear
+keybind=super+v=paste_from_clipboard
+
+# panes (leader + vim keys)
+keybind=ctrl+space>h=goto_split:left
+keybind=ctrl+space>j=goto_split:bottom
+keybind=ctrl+space>k=goto_split:top
+keybind=ctrl+space>l=goto_split:right
+
+# split management
+keybind=ctrl+space>shift+apostrophe=new_split:down
+keybind=ctrl+space>shift+5=new_split:right
+keybind=ctrl+space>space=equalize_splits
+
+keybind = ctrl+space>f=toggle_split_zoom
+keybind=ctrl+space>z=toggle_split_zoom
+keybind=ctrl+space>w=close_surface
+
+# tabs
+keybind=ctrl+space>c=new_tab
+keybind=ctrl+space>x=close_tab
+keybind=ctrl+space>n=next_tab
+keybind=ctrl+space>p=previous_tab
+
+# fast cycling
+keybind=ctrl+tab=next_tab
+keybind=ctrl+shift+tab=previous_tab
+
+# direct tab jumps
+#keybind=ctrl+space>1=goto_tab:1
+#keybind=ctrl+space>2=goto_tab:2
+#keybind=ctrl+space>3=goto_tab:3
+#keybind=ctrl+space>4=goto_tab:4
+#keybind=ctrl+space>5=goto_tab:5
+#keybind=ctrl+space>6=goto_tab:6
+#keybind=ctrl+space>7=goto_tab:7
+#keybind=ctrl+space>8=goto_tab:8
+#keybind=ctrl+space>9=goto_tab:9
+#keybind=ctrl+space>0=goto_tab:10
+
+keybind=super+r=reload_config
+

@@ -28,4 +28,10 @@
   home.file.".config/aerospace/aerospace.toml" = {
     source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/dotfiles/aerospace/aerospace.toml";
   };
+
+  # Ghostty configuration
+  home.file.".config/ghostty" = {
+    source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/dotfiles/ghostty";
+    recursive = true;
+  };
 }
