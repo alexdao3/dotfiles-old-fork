@@ -50,5 +50,5 @@ keybind=ctrl+shift+tab=previous_tab
 #keybind=ctrl+a>9=goto_tab:9
 #keybind=ctrl+a>0=goto_tab:10
 
-keybind=super+r=reload_config
-
+# Note: reload_config is not available in all Ghostty versions
+# Just restart Ghostty to reload config if needed
