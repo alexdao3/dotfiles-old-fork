@@ -1,0 +1,169 @@
+#!/usr/bin/env bash
+# Fathom development environment launcher for Ghostty
+
+set -e
+
+FATHOM_DIR="/Users/alex/dev/fathom"
+
+function killold {
+  echo "Killing old processes..."
+  pkill -9 puma 2>/dev/null || true
+
+  pid_file="${FATHOM_DIR}/tmp/pids/server.pid"
+  if [[ -f ${pid_file} ]]; then
+    pid=$(cat ${pid_file})
+    if [[ -n ${pid} ]]; then
+      echo "Killing leftover pid ${pid}"
+      kill -9 "${pid}" 2>/dev/null || true
+    fi
+  fi
+
+  cd "$FATHOM_DIR" && docker compose down 2>/dev/null || true
+}
+
+function setup_docker {
+  echo "Starting Docker..."
+  which colima &>/dev/null && colima start
+  cd "$FATHOM_DIR"
+  docker compose pull
+  docker compose up -d --remove-orphans
+  docker compose restart nginx
+  bundle exec rails db:create RAILS_ENV=test 2>/dev/null || true
+}
+
+# Clean up old processes
+killold
+
+# Start docker in background
+setup_docker &
+DOCKER_PID=$!
+
+# Wait for docker setup
+wait $DOCKER_PID
+
+# Open Ghostty with tabs and splits using AppleScript
+osascript <<'EOF'
+tell application "Ghostty"
+    activate
+    delay 0.5
+end tell
+
+tell application "System Events"
+    tell process "Ghostty"
+        -- Tab 1: Docker logs (current tab)
+        keystroke "cd /Users/alex/dev/fathom && docker compose logs -f"
+        keystroke return
+        delay 0.3
+
+        -- Tab 2: Local Dev (rails, sidekiq, stencil, ngrok in splits)
+        keystroke "t" using command down
+        delay 0.3
+
+        -- Rails server in first pane
+        keystroke "cd /Users/alex/dev/fathom && bundle exec rails server"
+        keystroke return
+        delay 0.2
+
+        -- Split right for Sidekiq
+        keystroke "d" using command down
+        delay 0.2
+        keystroke "cd /Users/alex/dev/fathom && bundle exec sidekiq"
+        keystroke return
+        delay 0.2
+
+        -- Split down for Stencil
+        keystroke "D" using {command down, shift down}
+        delay 0.2
+        keystroke "cd /Users/alex/dev/fathom && npm start"
+        keystroke return
+        delay 0.2
+
+        -- Go to left pane and split down for ngrok
+        keystroke "h" using control down
+        delay 0.2
+        keystroke "D" using {command down, shift down}
+        delay 0.2
+        keystroke "cd /Users/alex/dev/fathom && sleep 30 && ngrok start --all"
+        keystroke return
+        delay 0.2
+
+        -- Tab 3: Rails Console
+        keystroke "t" using command down
+        delay 0.3
+        keystroke "cd /Users/alex/dev/fathom && bundle exec rails console"
+        keystroke return
+        delay 0.2
+
+        -- Tab 4: 4-way grid (empty shells)
+        keystroke "t" using command down
+        delay 0.3
+        keystroke "cd /Users/alex/dev/fathom"
+        keystroke return
+        delay 0.2
+
+        -- Split right
+        keystroke "d" using command down
+        delay 0.2
+        keystroke "cd /Users/alex/dev/fathom"
+        keystroke return
+        delay 0.2
+
+        -- Split down (bottom right)
+        keystroke "D" using {command down, shift down}
+        delay 0.2
+        keystroke "cd /Users/alex/dev/fathom"
+        keystroke return
+        delay 0.2
+
+        -- Go to top left and split down (bottom left)
+        keystroke "h" using control down
+        delay 0.1
+        keystroke "k" using control down
+        delay 0.2
+        keystroke "D" using {command down, shift down}
+        delay 0.2
+        keystroke "cd /Users/alex/dev/fathom"
+        keystroke return
+        delay 0.2
+
+        -- Equalize splits
+        keystroke "e" using command down
+        delay 0.2
+
+        -- Tab 5: REPLICA (proxy + console)
+        keystroke "t" using command down
+        delay 0.3
+
+        -- Proxy in top pane
+        keystroke "cd /Users/alex/dev/fathom && proxy_read_replica"
+        keystroke return
+        delay 0.2
+
+        -- Split down for replica console (with delay for proxy to start)
+        keystroke "D" using {command down, shift down}
+        delay 0.2
+        keystroke "cd /Users/alex/dev/fathom && echo 'Waiting for proxy...' && sleep 5 && rails_console_replica"
+        keystroke return
+        delay 0.2
+
+        -- Tab 6: PRODUCTION CONSOLE
+        keystroke "t" using command down
+        delay 0.3
+        keystroke "cd ~/dev/fathom-utils/console && ./remote-shell.sh production"
+        keystroke return
+        delay 0.2
+
+        -- Go back to Tab 2 (local dev)
+        keystroke "2" using command down
+    end tell
+end tell
+EOF
+
+echo "Fathom dev environment started in Ghostty!"
+echo "Tabs:"
+echo "  1. Docker logs"
+echo "  2. Local Dev (Rails, Sidekiq, Stencil, ngrok)"
+echo "  3. Rails Console"
+echo "  4. 4-way grid"
+echo "  5. REPLICA (proxy + console)"
+echo "  6. PRODUCTION CONSOLE"

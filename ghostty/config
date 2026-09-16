@@ -1,54 +1,28 @@
+auto-update-channel = tip
 shell-integration = zsh
 font-family = MesloLGS Nerd Font Mono
-font-size = 16
+font-size = 13
 background-opacity = 0.85
 theme = Afterglow
 macos-option-as-alt = true
 mouse-hide-while-typing = true
-scrollback-limit = 1000000
+scrollback-limit = 10000000
 
 keybind = shift+enter=text:\x1b\r
 
-# wipe defaults, add paste back
-keybind=clear
-keybind=super+v=paste_from_clipboard
+# Pane navigation (vim-style, direct)
+keybind=ctrl+h=goto_split:left
+keybind=ctrl+j=goto_split:bottom
+keybind=ctrl+k=goto_split:top
+keybind=ctrl+l=goto_split:right
 
-# panes (leader ctrl+a + vim keys)
-keybind=ctrl+a>h=goto_split:left
-keybind=ctrl+a>j=goto_split:bottom
-keybind=ctrl+a>k=goto_split:top
-keybind=ctrl+a>l=goto_split:right
+# Split management (Cmd-based, avoids vim conflicts)
+keybind=super+d=new_split:right
+keybind=super+shift+d=new_split:down
+keybind=super+shift+enter=toggle_split_zoom
+keybind=super+e=equalize_splits
+# Close pane: Cmd+W (macOS default)
 
-# split management
-keybind=ctrl+a>shift+apostrophe=new_split:down
-keybind=ctrl+a>shift+5=new_split:right
-keybind=ctrl+a>a=equalize_splits
-
-keybind=ctrl+a>f=toggle_split_zoom
-keybind=ctrl+a>z=toggle_split_zoom
-keybind=ctrl+a>w=close_surface
-
-# tabs
-keybind=ctrl+a>c=new_tab
-keybind=ctrl+a>x=close_tab
-keybind=ctrl+a>n=next_tab
-keybind=ctrl+a>p=previous_tab
-
-# fast cycling
+# Tabs (Cmd+T for new tab via macOS default)
 keybind=ctrl+tab=next_tab
 keybind=ctrl+shift+tab=previous_tab
-
-# direct tab jumps
-#keybind=ctrl+a>1=goto_tab:1
-#keybind=ctrl+a>2=goto_tab:2
-#keybind=ctrl+a>3=goto_tab:3
-#keybind=ctrl+a>4=goto_tab:4
-#keybind=ctrl+a>5=goto_tab:5
-#keybind=ctrl+a>6=goto_tab:6
-#keybind=ctrl+a>7=goto_tab:7
-#keybind=ctrl+a>8=goto_tab:8
-#keybind=ctrl+a>9=goto_tab:9
-#keybind=ctrl+a>0=goto_tab:10
-
-# Note: reload_config is not available in all Ghostty versions
-# Just restart Ghostty to reload config if needed

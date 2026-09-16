@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+# Diagnose why AeroSpace keybindings have stopped responding, most often after waking from sleep.
+#
+# AeroSpace registers its hotkeys through Carbon RegisterEventHotKey, which macOS silently disables
+# while secure input mode is on. The lock screen turns secure input on, so an app that fails to
+# release it after login leaves every binding dead while AeroSpace itself looks perfectly healthy.
+set -uo pipefail
+
+problem=0
+
+echo "AeroSpace"
+if pgrep -qf 'AeroSpace.app'; then
+    uptime=$(ps -o etime= -p "$(pgrep -f 'AeroSpace.app' | head -1)" | tr -d ' ')
+    echo "  running, up $uptime"
+    if aerospace list-workspaces --focused >/dev/null 2>&1; then
+        echo "  server responding, focused workspace $(aerospace list-workspaces --focused)"
+    else
+        echo "  NOT RESPONDING -- restart with: open -a AeroSpace"
+        problem=1
+    fi
+else
+    echo "  NOT RUNNING -- start with: open -a AeroSpace"
+    problem=1
+fi
+
+echo
+echo "Secure input"
+holder=$(ioreg -l -d 1 -w 0 | sed -n 's/.*"kCGSSessionSecureInputPID"=\([0-9]*\).*/\1/p' | head -1)
+if [ -n "$holder" ] && [ "$holder" != "0" ]; then
+    name=$(ps -o comm= -p "$holder" 2>/dev/null | sed 's|.*/||')
+    echo "  ON, held by ${name:-unknown} (pid $holder)"
+    echo "  This blocks every AeroSpace hotkey. Fix by quitting that app, or lock and unlock"
+    echo "  the screen (ctrl-cmd-q) to reset it."
+    problem=1
+else
+    echo "  off, hotkeys are not being blocked"
+fi
+
+echo
+echo "Karabiner (caps lock -> hyper)"
+for proc in Karabiner-VirtualHIDDevice-Daemon karabiner_console_user_server; do
+    if pgrep -qf "$proc"; then
+        echo "  $proc running"
+    else
+        echo "  $proc MISSING -- caps lock bindings will not fire"
+        problem=1
+    fi
+done
+
+echo
+if [ "$problem" -eq 0 ]; then
+    echo "Nothing wrong found. If bindings still fail, check whether it is only the caps-"
+    echo "ones (Karabiner) or only alt-shift- ones (AeroSpace) to narrow it down."
+else
+    echo "See above for the fix."
+fi

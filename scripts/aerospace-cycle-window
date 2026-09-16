@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Cycle focus through the windows of the current workspace, floating ones included.
+# AeroSpace's built-in 'focus dfs-next' crashes on workspaces that hold floating windows, so this
+# walks the window list and focuses by id, which never touches that code path.
+# Written for bash 3.2, the version macOS ships, so no mapfile or associative arrays.
+set -euo pipefail
+
+direction="${1:-next}"
+
+workspace=$(aerospace list-workspaces --focused)
+
+ids=()
+while IFS= read -r id; do
+    [[ -n $id ]] && ids+=("$id")
+done < <(aerospace list-windows --workspace "$workspace" --format '%{window-id}')
+
+[[ ${#ids[@]} -lt 2 ]] && exit 0
+
+current=$(aerospace list-windows --focused --format '%{window-id}' 2>/dev/null || echo '')
+
+index=-1
+for i in "${!ids[@]}"; do
+    if [[ ${ids[$i]} == "$current" ]]; then
+        index=$i
+        break
+    fi
+done
+
+if [[ $direction == prev ]]; then
+    target=$(( (index - 1 + ${#ids[@]}) % ${#ids[@]} ))
+else
+    target=$(( (index + 1) % ${#ids[@]} ))
+fi
+
+aerospace focus --window-id "${ids[$target]}"

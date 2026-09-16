@@ -1,6 +1,16 @@
 # Place a copy of this config to ~/.aerospace.toml
 # After that, you can edit ~/.aerospace.toml to your liking
 
+# See: https://nikitabobko.github.io/AeroSpace/guide#config-version
+config-version = 2
+
+# Reload on save. A manual reload is required once to arm it.
+auto-reload-config = true
+
+# Under config-version 2 workspaces are no longer inferred from bindings, so the ones apps are
+# assigned to must be listed here or they vanish whenever their app is closed.
+persistent-workspaces = ["E", "T", "W", "S", "C", "M", "V", "O"]
+
 # You can use it to add commands that run after login to macOS user session.
 # 'start-at-login' needs to be 'true' for 'after-login-command' to work
 # Available commands: https://nikitabobko.github.io/AeroSpace/commands
@@ -9,12 +19,10 @@ after-login-command = []
 # You can use it to add commands that run after AeroSpace startup.
 # 'after-startup-command' is run after 'after-login-command'
 # Available commands : https://nikitabobko.github.io/AeroSpace/commands
-after-startup-command = [
-  'exec-and-forget borders width=0 active_color=0x00000000 inactive_color=0x00000000'
-]
+after-startup-command = []
 
 # Start AeroSpace at login
-start-at-login = false
+start-at-login = true
 
 # Normalizations. See: https://nikitabobko.github.io/AeroSpace/guide#normalization
 enable-normalization-flatten-containers = true
@@ -39,7 +47,6 @@ default-root-container-orientation = 'auto'
 # See https://nikitabobko.github.io/AeroSpace/commands#move-mouse
 # Fallback value (if you omit the key): on-focused-monitor-changed = []
 on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
-on-focus-changed = 'move-mouse monitor-lazy-center'
 
 # You can effectively turn off macOS "Hide application" (cmd-h) feature by toggling this flag
 # Useful if you don't use this macOS feature, but accidentally hit cmd-h or cmd-alt-h key
@@ -99,15 +106,42 @@ automatically-unhide-macos-hidden-apps = false
     # end tell'
     # '''
 
-    # See: https://nikitabobko.github.io/AeroSpace/commands#layout
-    alt-slash = 'layout tiles horizontal vertical'
-    alt-comma = 'layout accordion horizontal vertical'
+    # Two rules cover everything: cmd-ctrl-alt-shift is the hyper key Karabiner puts on caps lock
+    # and means "go there", alt-shift means "take this window with me". Bare alt stays unbound so
+    # zsh keeps its Meta bindings.
+
+    # Go to a workspace, launching the app if it is not running yet. 'open -a' only activates an
+    # app that is already up, and on-window-detected lands a fresh window on the right workspace.
+    cmd-ctrl-alt-shift-e = ['workspace E', 'exec-and-forget open -a Emacs']
+    cmd-ctrl-alt-shift-t = ['workspace T', 'exec-and-forget open -a Ghostty']
+    cmd-ctrl-alt-shift-w = ['workspace W', 'exec-and-forget open -a "Google Chrome"']
+    cmd-ctrl-alt-shift-s = ['workspace S', 'exec-and-forget open -a Slack']
+    cmd-ctrl-alt-shift-c = ['workspace C', 'exec-and-forget open -a Claude']
+    cmd-ctrl-alt-shift-m = ['workspace M', 'exec-and-forget open -a Messages']
+    cmd-ctrl-alt-shift-v = ['workspace V', 'exec-and-forget open -a zoom.us']
+    cmd-ctrl-alt-shift-o = ['workspace O', 'exec-and-forget open -a Obsidian']
+
+    # Send the focused window to a workspace and follow it there.
+    alt-shift-e = 'move-node-to-workspace --focus-follows-window E'
+    alt-shift-t = 'move-node-to-workspace --focus-follows-window T'
+    alt-shift-w = 'move-node-to-workspace --focus-follows-window W'
+    alt-shift-s = 'move-node-to-workspace --focus-follows-window S'
+    alt-shift-c = 'move-node-to-workspace --focus-follows-window C'
+    alt-shift-m = 'move-node-to-workspace --focus-follows-window M'
+    alt-shift-v = 'move-node-to-workspace --focus-follows-window V'
+    alt-shift-o = 'move-node-to-workspace --focus-follows-window O'
 
     # See: https://nikitabobko.github.io/AeroSpace/commands#focus
-    ctrl-h = 'focus left'
-    ctrl-j = 'focus down'
-    ctrl-k = 'focus up'
-    ctrl-l = 'focus right'
+    cmd-ctrl-alt-shift-h = 'focus left'
+    cmd-ctrl-alt-shift-j = 'focus down'
+    cmd-ctrl-alt-shift-k = 'focus up'
+    cmd-ctrl-alt-shift-l = 'focus right'
+
+    # Cycling is done by window id through a script. AeroSpace's own 'focus dfs-next' crashes the
+    # whole app when a workspace holds floating windows (assertion in makeFloatingWindowsSeenAsTiling).
+    cmd-ctrl-alt-shift-n = 'exec-and-forget /Users/alex/dotfiles/scripts/aerospace-cycle-window next'
+    cmd-ctrl-alt-shift-p = 'exec-and-forget /Users/alex/dotfiles/scripts/aerospace-cycle-window prev'
+    cmd-ctrl-alt-shift-quote = 'focus-back-and-forth'
 
     # See: https://nikitabobko.github.io/AeroSpace/commands#move
     alt-shift-h = 'move left'
@@ -115,87 +149,24 @@ automatically-unhide-macos-hidden-apps = false
     alt-shift-k = 'move up'
     alt-shift-l = 'move right'
 
-    # See: https://nikitabobko.github.io/AeroSpace/commands#resize
-    alt-minus = 'resize smart -50'
-    alt-equal = 'resize smart +50'
-
-    # See: https://nikitabobko.github.io/AeroSpace/commands#workspace
-    alt-1 = 'workspace 1'
-    alt-2 = 'workspace 2'
-    alt-3 = 'workspace 3'
-    alt-4 = 'workspace 4'
-    alt-5 = 'workspace 5'
-    alt-6 = 'workspace 6'
-    alt-7 = 'workspace 7'
-    alt-8 = 'workspace 8'
-    alt-9 = 'workspace 9'
-    alt-a = 'workspace A' # In your config, you can drop workspace bindings that you don't need
-    # alt-b = 'workspace B'
-    alt-c = 'workspace C'
-    alt-d = 'workspace D'
-    alt-e = 'workspace E'
-    # alt-f = 'workspace F'
-    alt-g = 'workspace G'
-    alt-i = 'workspace I'
-    alt-m = 'workspace M'
-    alt-n = 'workspace N'
-    alt-o = 'workspace O'
-    alt-p = 'workspace P'
-    alt-q = 'workspace Q'
-    alt-r = 'workspace R'
-    alt-s = 'workspace S'
-    alt-t = 'workspace T'
-    alt-u = 'workspace U'
-    alt-v = 'workspace V'
-    alt-w = 'workspace W'
-    alt-x = 'workspace X'
-    alt-y = 'workspace Y'
-    alt-z = 'workspace Z'
-
-    # See: https://nikitabobko.github.io/AeroSpace/commands#move-node-to-workspace
-    alt-shift-1 = 'move-node-to-workspace 1'
-    alt-shift-2 = 'move-node-to-workspace 2'
-    alt-shift-3 = 'move-node-to-workspace 3'
-    alt-shift-4 = 'move-node-to-workspace 4'
-    alt-shift-5 = 'move-node-to-workspace 5'
-    alt-shift-6 = 'move-node-to-workspace 6'
-    alt-shift-7 = 'move-node-to-workspace 7'
-    alt-shift-8 = 'move-node-to-workspace 8'
-    alt-shift-9 = 'move-node-to-workspace 9'
-    alt-shift-a = 'move-node-to-workspace A'
-    alt-shift-b = 'move-node-to-workspace B'
-    alt-shift-c = 'move-node-to-workspace C'
-    alt-shift-d = 'move-node-to-workspace D'
-    alt-shift-e = 'move-node-to-workspace E'
-    alt-shift-g = 'move-node-to-workspace G'
-    alt-shift-i = 'move-node-to-workspace I'
-    alt-shift-m = 'move-node-to-workspace M'
-    alt-shift-n = 'move-node-to-workspace N'
-    alt-shift-o = 'move-node-to-workspace O'
-    alt-shift-p = 'move-node-to-workspace P'
-    alt-shift-q = 'move-node-to-workspace Q'
-    alt-shift-s = 'move-node-to-workspace S'
-    alt-shift-t = 'move-node-to-workspace T'
-    alt-shift-u = 'move-node-to-workspace U'
-    alt-shift-v = 'move-node-to-workspace V'
-    alt-shift-w = 'move-node-to-workspace W'
-    alt-shift-x = 'move-node-to-workspace X'
-    alt-shift-y = 'move-node-to-workspace Y'
-    alt-shift-z = 'move-node-to-workspace Z'
-
     alt-shift-f = 'fullscreen'
+    cmd-ctrl-alt-shift-f = 'fullscreen'
+    cmd-ctrl-alt-shift-tab = 'workspace-back-and-forth'
 
-    # See: https://nikitabobko.github.io/AeroSpace/commands#workspace-back-and-forth
-    alt-tab = 'workspace-back-and-forth'
+    # See: https://nikitabobko.github.io/AeroSpace/commands#resize
+    cmd-ctrl-alt-shift-minus = 'resize smart -50'
+    cmd-ctrl-alt-shift-equal = 'resize smart +50'
+
+    # See: https://nikitabobko.github.io/AeroSpace/commands#layout
+    cmd-ctrl-alt-shift-slash = 'layout tiles horizontal vertical'
+    alt-shift-b = 'balance-sizes'
+
     # See: https://nikitabobko.github.io/AeroSpace/commands#move-workspace-to-monitor
     alt-shift-tab = 'move-workspace-to-monitor --wrap-around next'
-    # See: https://nikitabobko.github.io/AeroSpace/commands#move-node-to-monitor
-    ctrl-alt-shift-tab = 'move-node-to-monitor --wrap-around next'
 
     # See: https://nikitabobko.github.io/AeroSpace/commands#mode
-    alt-shift-semicolon = 'mode service'
-
-    alt-shift-r = 'mode resize'
+    cmd-ctrl-alt-shift-semicolon = 'mode service'
+    cmd-ctrl-alt-shift-r = 'mode resize'
 
 [mode.resize.binding]
     h = 'resize width -50'
@@ -217,11 +188,72 @@ automatically-unhide-macos-hidden-apps = false
     # sticky is not yet supported https://github.com/nikitabobko/AeroSpace/issues/2
     #s = ['layout sticky tiling', 'mode main']
 
-    alt-shift-h = ['join-with left', 'mode main']
-    alt-shift-j = ['join-with down', 'mode main']
-    alt-shift-k = ['join-with up', 'mode main']
-    alt-shift-l = ['join-with right', 'mode main']
+    ctrl-alt-shift-h = ['join-with left', 'mode main']
+    ctrl-alt-shift-j = ['join-with down', 'mode main']
+    ctrl-alt-shift-k = ['join-with up', 'mode main']
+    ctrl-alt-shift-l = ['join-with right', 'mode main']
 
     down = 'volume down'
     up = 'volume up'
     shift-down = ['volume set 0', 'mode main']
+
+# One app family per workspace. Ghostty must stay floating: its native tabs are reported to
+# AeroSpace as separate windows, so tiling it makes the layout jump on every new tab.
+[[on-window-detected]]
+if.app-id = 'com.mitchellh.ghostty'
+run = ['layout floating', 'move-node-to-workspace T']
+
+[[on-window-detected]]
+if.app-id = 'org.gnu.Emacs'
+run = 'move-node-to-workspace E'
+
+[[on-window-detected]]
+if.app-id = 'com.google.Chrome'
+run = 'move-node-to-workspace W'
+
+[[on-window-detected]]
+if.app-id = 'com.apple.Safari'
+run = 'move-node-to-workspace W'
+
+[[on-window-detected]]
+if.app-id = 'com.tinyspeck.slackmacgap'
+run = 'move-node-to-workspace S'
+
+[[on-window-detected]]
+if.app-id = 'com.anthropic.claudefordesktop'
+run = 'move-node-to-workspace C'
+
+[[on-window-detected]]
+if.app-id = 'com.openai.chat'
+run = 'move-node-to-workspace C'
+
+[[on-window-detected]]
+if.app-id = 'com.apple.MobileSMS'
+run = 'move-node-to-workspace M'
+
+[[on-window-detected]]
+if.app-id = 'net.whatsapp.WhatsApp'
+run = 'move-node-to-workspace M'
+
+[[on-window-detected]]
+if.app-id = 'us.zoom.xos'
+run = 'move-node-to-workspace V'
+
+[[on-window-detected]]
+if.app-id = 'tandem.app'
+run = 'move-node-to-workspace V'
+
+# Tray app: no workspace assignment, so its window opens on whichever workspace is already
+# focused. Floating keeps it from reshuffling that workspace's tiling. AeroSpace has no sticky
+# windows (nikitabobko/AeroSpace#2), so appearing on every workspace is not possible.
+[[on-window-detected]]
+if.app-id = 'video.fathom.electron'
+run = 'layout floating'
+
+[[on-window-detected]]
+if.app-id = 'md.obsidian'
+run = 'move-node-to-workspace O'
+
+[[on-window-detected]]
+if.app-id = 'com.apple.Notes'
+run = 'move-node-to-workspace O'
